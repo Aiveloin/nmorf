@@ -201,6 +201,8 @@ Sub CalculateMapCentroid(Table As String, X As Float, Y As Float)
 		GeometryObject = ObjColumn
 		If ObjectInfo (GeometryObject, OBJ_Info_TYPE) = OBJ_REGION Then 
 			Dim ObjX, ObjY As Float
+			ObjX = 0
+			ObjY = 0
 			Call CalculatePolyCentroid(GeometryObject, ObjX, ObjY)
 			X = ObjX + X
 			Y = ObjY + Y
@@ -217,10 +219,9 @@ End Sub
 Sub ScaleMap(Table As String, Multiplier As Float)	
 	Dim ObjColumn As Alias
 	Dim GeometryObject As Object
+	Dim MapCentroidX, MapCentroidY As Float
 	
 	ObjColumn = Table + ".OBJ"
-
-	Dim MapCentroidX, MapCentroidY As Float
 	Call CalculateMapCentroid(Table, MapCentroidX, MapCentroidY)
 
 	Fetch First From Table
@@ -238,6 +239,9 @@ Sub ScaleMap(Table As String, Multiplier As Float)
 			For CPOLY = 1 To NPOLYS
 				NPOINTS = ObjectInfo(GeometryObject, OBJ_Info_NPOLYGONS + CPOLY)
 				
+				PolyCentroidX = 0
+				PolyCentroidY = 0
+				
 				Call CalculatePolygonCentroid(GeometryObject, CPOLY, POLYCENTROIDX, POLYCENTROIDY)
 				
 				VECX = PolyCentroidX - MapCentroidX
@@ -248,15 +252,11 @@ Sub ScaleMap(Table As String, Multiplier As Float)
 					OLDY = ObjectNODEY(GeometryObject, CPOLY, CPOINT)
 					NEWX = OldX + VECX
 					NEWY = OldY + VECY
-					
 					Alter Object GeometryObject NODE SET POSITION CPOLY, CPOINT (NEWX, NEWY)
 				Next
 			Next
-			
 			CURROW = Table + ".ROWId"
-			UPDATE Table
-				SET OBJ = GeometryObject
-				WHERE ROWId = CURROW
+			UPDATE Table SET OBJ = GeometryObject WHERE ROWId = CURROW
 		End If
 		Fetch Next From Table
 	Wend
@@ -317,11 +317,15 @@ Sub NmorfMap(Table As String, ColumnNum As Integer, ParameterSum As Float, AreaS
 	While Not EOT(Table)
 		TMP = OBJCOLUMN
 		If ObjectInfo(Tmp, OBJ_Info_TYPE) = OBJ_REGION Then
+			
 			Multiplier = Sqr (Column / ParameterSum * AreaSum / Area (TMP, "SQ KM") )
+			
+			If ScaleMode = 1 Then
+				Call ScaleMap(Table, MaxMultiplier)
+			End If
 			
 			If ScaleMode = 2 Then
 				Multiplier =  Multiplier / MaxMultiplier
-				print Multiplier
 			End If	
 			
 			Call ScaleRegion(TMP, Multiplier)
@@ -353,12 +357,7 @@ Sub Main
 		MaxArea = FindMaxArea(TableName)
 		MaxMultiplier = FindMaxMultiplier(TableName, ColumnNum, ParameterSum, AreaSum)
 		
-		' хак на время доработки
-		ScaleMode = 2
-		
-		' пройти по таблице и анаморфировать
 		Call NmorfMap(TableName, ColumnNum, ParameterSum, AreaSum, MaxMultiplier, ScaleMode)
 	End If
 End Sub
 
- 

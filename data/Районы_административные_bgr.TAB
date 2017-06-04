@@ -1,0 +1,18 @@
+!table
+!version 450
+!charset WindowsCyrillic
+
+Definition Table
+  Type NATIVE Charset "WindowsCyrillic"
+  Fields 6
+    Название Char (30) Index 1 ;
+    Площадь Float Index 2 ;
+    Население Float Index 3 ;
+    Работники Float Index 4 ;
+    Газ Float Index 5 ;
+    Субсидии Float Index 6 ;
+begin_metadata
+"\IsReadOnly" = "FALSE"
+"\MapInfo" = ""
+"\MapInfo\TableID" = "af3f6343-aa6a-4173-8574-78c2496fc09e"
+end_metadata
