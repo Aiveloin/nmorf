@@ -1,42 +1,42 @@
 Include "mapbasic.def"
 
 Declare Sub      Main
-Declare Function BuildListOfColumns(Table as Integer) as String
-Declare Function BuildListOfTables() as String
-Declare Sub      CreateDialog(Table as Integer, Column as Integer, ScaleMode as Integer)
+Declare Function BuildListOfColumns(Table As Integer) As String
+Declare Function BuildListOfTables() As String
+Declare Sub      CreateDialog(Table As Integer, Column As Integer, ScaleMode As Integer)
 Declare Sub      UpdateDialog
-Declare Function CalculateParameterSum(TableName as String, Column as Integer) as Float
-Declare Function CalculateAreaSum(TableName as String) as Float
-Declare Sub      CalculatePolyCentroid(GeometryObject as Object, X as Float, Y as Float)
-Declare Sub      CalculateMapCentroid(TableName as String, X as Float, Y as Float)
-Declare Function FindMaxMultiplier(TableName as String, Column as Integer, MaxParameter as Float, MaxArea as Float) as Float
-Declare Sub      ScaleMap(TableName as String, Multiplier as Float)
-Declare Sub      ScalePolygon(TMP as Object, CPOLY as Integer, POLYCENTROIdX as Float, POLYCENTROIdY as FLoat, Multiplier as Float)
-Declare Function FindMaxParameter(TableName as String, Column as Integer) as Float
-Declare Function FindMaxArea(TableName as String) as Float
-Declare Sub      CalculatePolygonCentroid(TMP as Object, CPOLY as Integer, POLYCENTROIdX as Float, POLYCENTROIdY as FLoat)
-Declare Sub      ScaleRegion(Poly as Object, Multiplier as Float)
-Declare Sub      NmorfMap(Table As String, Column As Integer, ParameterSum As Float, AreaSum As Float, MaxMultiplier As Float, ScaleMode As Integer)
+Declare Function CalculateParameterSum(TableName As String, Column As Integer) As Float
+Declare Function CalculateAreaSum(TableName As String) As Float
+Declare Sub      CalculatePolyCentroid(GeometryObject As Object, X As Float, Y As Float)
+Declare Sub      CalculateMapCentroid(TableName As String, X As Float, Y As Float)
+Declare Function FindMaxMultiplier(TableName As String, Column As Integer, MaxParameter As Float, MaxArea As Float) As Float
+Declare Sub      ScaleMap(TableName As String, Multiplier As Float)
+Declare Sub      ScalePolygon(TMP As Object, CPOLY As Integer, POLYCENTROIdX As Float, POLYCENTROIdY As FLoat, Multiplier As Float)
+Declare Function FindMaxParameter(TableName As String, Column As Integer) As Float
+Declare Function FindMaxArea(TableName As String) As Float
+Declare Sub      CalculatePolygonCentroid(TMP As Object, CPOLY As Integer, POLYCENTROIdX As Float, POLYCENTROIdY As FLoat)
+Declare Sub      ScaleRegion(Poly As Object, Multiplier As Float)
+Declare Sub      NmorfMap(TableName As String, Column As Integer, ParameterSum As Float, AreaSum As Float, MaxMultiplier As Float, ScaleMode As Integer)
 
-Function BuildListOfTables() as String
-	Dim Table as Integer
-	Dim ListOfTables as String
+Function BuildListOfTables() As String
+	Dim Table As Integer
+	Dim ListOfTables As String
 	For Table = 1 To NumTables()
 		ListOfTables = ListOfTables + TableInfo(Table, TAB_Info_NAME) + ";"
 	Next
 	BuildListOfTables = ListOfTables
 End Function
 
-Function BuildListOfColumns(Table as Integer) as String
-	Dim Column as Integer
-	Dim Return as String
+Function BuildListOfColumns(Table As Integer) As String
+	Dim Column As Integer
+	Dim Return As String
 	For Column = 1 To NumCols(Table)
 		Return = Return + ColumnInfo (Table, "COL" + Column, COL_Info_NAME) + ";"
 	Next
 	BuildListOfColumns = Return
 End Function
 
-Sub CreateDialog (Table as Integer, Column as Integer, ScaleMode as Integer)
+Sub CreateDialog (Table As Integer, Column As Integer, ScaleMode As Integer)
 	Dialog  
 		Title "Select nmorf setup"
 
@@ -60,14 +60,14 @@ Sub CreateDialog (Table as Integer, Column as Integer, ScaleMode as Integer)
 End Sub
 
 Sub UpdateDialog
-	Dim Table as Integer
+	Dim Table As Integer
 	Table = ReadControlValue(1) 
 	Alter Control 2 Title BuildListOfColumns(Table)
 End Sub
 
-Function CalculateParameterSum(TableName as String, Column as Integer) as Float
-	Dim ParameterSum as Float
-	Dim ColumnValue as Alias
+Function CalculateParameterSum(TableName As String, Column As Integer) As Float
+	Dim ParameterSum As Float
+	Dim ColumnValue As Alias
 	ColumnValue = TableName + ".COL" & Column
 
 	Fetch First From TableName
@@ -80,9 +80,9 @@ Function CalculateParameterSum(TableName as String, Column as Integer) as Float
 	CalculateParameterSum = ParameterSum
 End Function
 
-Function CalculateAreaSum(Table as String) as Float
-	Dim AreaSum as Float
-	Dim GeometryObject as Alias
+Function CalculateAreaSum(Table As String) As Float
+	Dim AreaSum As Float
+	Dim GeometryObject As Alias
 	
 	GeometryObject = Table + ".OBJ"
 	Fetch First From Table
@@ -95,10 +95,10 @@ Function CalculateAreaSum(Table as String) as Float
 	CalculateAreaSum = AreaSum
 End Function
 
-Function FindMaxMultiplier(Table as String, Column as Integer, MaxParameter as Float, MaxArea as Float) as Float
-	Dim MaxMultiplier as Float
-	Dim GeometryObject as Alias
-	Dim ColumnValue as Alias
+Function FindMaxMultiplier(Table As String, Column As Integer, MaxParameter As Float, MaxArea As Float) As Float
+	Dim MaxMultiplier As Float
+	Dim GeometryObject As Alias
+	Dim ColumnValue As Alias
 
 	GeometryObject = Table + ".OBJ"
 	ColumnValue = Table + ".COL" & Column
@@ -107,7 +107,7 @@ Function FindMaxMultiplier(Table as String, Column as Integer, MaxParameter as F
 
 	While Not EOT(Table)
 		If ObjectInfo(GeometryObject, OBJ_INFO_TYPE) = OBJ_REGION Then
-			Dim Multiplier as Float
+			Dim Multiplier As Float
 			Multiplier = Sqr(ColumnValue / MaxParameter * MaxArea / Area(GeometryObject, "SQ KM"))
 			If Multiplier > MaxMultiplier Then
 				MaxMultiplier = Multiplier
@@ -119,10 +119,10 @@ Function FindMaxMultiplier(Table as String, Column as Integer, MaxParameter as F
 	FindMaxMultiplier = MaxMultiplier
 End Function
 
-Function FindMaxParameter(Table as String, Column as Integer) as Float
-	Dim MaxParameter as Float
-	Dim GeometryObject as Alias
-	Dim ColumnValue as Alias
+Function FindMaxParameter(Table As String, Column As Integer) As Float
+	Dim MaxParameter As Float
+	Dim GeometryObject As Alias
+	Dim ColumnValue As Alias
 
 	GeometryObject = Table + ".OBJ"
 	ColumnValue = Table + ".COL" & Column
@@ -140,9 +140,9 @@ Function FindMaxParameter(Table as String, Column as Integer) as Float
 	FindMaxParameter = MaxParameter
 End Function
 
-Function FindMaxArea(TableName as String) as Float
-	Dim MaxArea as Float
-	Dim GeometryObject as Alias
+Function FindMaxArea(TableName As String) As Float
+	Dim MaxArea As Float
+	Dim GeometryObject As Alias
 	GeometryObject = TableName + ".OBJ"
 	Fetch First From TableName
 	While Not EOT(TableName)
@@ -154,14 +154,14 @@ Function FindMaxArea(TableName as String) as Float
 	FindMaxArea = MaxArea
 End Function
 
-Sub CalculatePolyCentroid(GeometryObject as Object, X as Float, Y as Float)
-	Dim NPOLYS as Integer
-	Dim CPOLY as Integer
-	Dim CPOINT as Integer
-	Dim NPOINTS as integer
+Sub CalculatePolyCentroid(GeometryObject As Object, X As Float, Y As Float)
+	Dim NPOLYS As Integer
+	Dim CPOLY As Integer
+	Dim CPOINT As Integer
+	Dim NPOINTS As integer
 	
-	Dim POLYCENTROIdX as Float
-	Dim POLYCENTROIdY as Float
+	Dim POLYCENTROIdX As Float
+	Dim POLYCENTROIdY As Float
 	
 	If ObjectInfo (GeometryObject, OBJ_Info_TYPE) = OBJ_REGION Then 
 		NPOLYS = ObjectInfo (GeometryObject, OBJ_Info_NPOLYGONS)
@@ -181,19 +181,19 @@ Sub CalculatePolyCentroid(GeometryObject as Object, X as Float, Y as Float)
 	End If
 End Sub
 
-Sub CalculateMapCentroid(Table as String, X as Float, Y as Float)
-	Dim ObjColumn as Alias
-	Dim GeometryObject as Object
-	Dim NumPolys as Integer
+Sub CalculateMapCentroid(Table As String, X As Float, Y As Float)
+	Dim ObjColumn As Alias
+	Dim GeometryObject As Object
+	Dim NumPolys As Integer
 	
-	ObjColumn = TableName + ".OBJ"
+	ObjColumn = Table + ".OBJ"
 	NumPolys = 1
 
 	Fetch First From Table
 	While Not EOT(Table)
 		GeometryObject = ObjColumn
 		If ObjectInfo (GeometryObject, OBJ_Info_TYPE) = OBJ_REGION Then 
-			Dim ObjX, ObjY as Float
+			Dim ObjX, ObjY As Float
 			Call CalculatePolyCentroid(GeometryObject, ObjX, ObjY)
 			X = ObjX + X
 			Y = ObjY + Y
@@ -206,42 +206,60 @@ Sub CalculateMapCentroid(Table as String, X as Float, Y as Float)
 	Y = Y / NumPolys
 End Sub
 
-Sub ScaleMap(Table as String, Multiplier as Float)	
-	Dim ObjColumn as Alias
-	Dim GeometryObject as Object
+
+Sub ScaleMap(Table As String, Multiplier As Float)	
+	Dim ObjColumn As Alias
+	Dim GeometryObject As Object
 	
 	ObjColumn = Table + ".OBJ"
+
+	Dim MapCentroidX, MapCentroidY As Float
+	Call CalculateMapCentroid(Table, MapCentroidX, MapCentroidY)
 
 	Fetch First From Table
 	While Not EOT(Table)
 		GeometryObject = ObjColumn
 		If ObjectInfo (GeometryObject, OBJ_Info_TYPE) = OBJ_REGION Then
-			Dim CURROW as Alias
-			Dim Tmp As Object
-			Tmp = GeometryObject
+			Dim CURROW As Alias
+			Dim PolyCentroidX, PolyCentroidY As Float
+			Dim NPOLYS, CPOLY, NPOINTS, CPOINT As Integer
 			
-			Call ScaleRegion(Tmp, Multiplier)
+			Dim OLDX, OLDY, NEWX, NEWY, VECX, VECY As Float
+			
+			NPOLYS = ObjectInfo(GeometryObject, OBJ_Info_NPOLYGONS)
+			
+			For CPOLY = 1 To NPOLYS
+				NPOINTS = ObjectInfo(GeometryObject, OBJ_Info_NPOLYGONS + CPOLY)
+				
+				Call CalculatePolygonCentroid(GeometryObject, CPOLY, POLYCENTROIDX, POLYCENTROIDY)
+				
+				VECX = PolyCentroidX - MapCentroidX
+				VECY = PolyCentroidY - MapCentroidY
+				
+				For CPOINT = 1 To NPOINTS-1
+					OLDX = ObjectNODEX(GeometryObject, CPOLY, CPOINT)
+					OLDY = ObjectNODEY(GeometryObject, CPOLY, CPOINT)
+					NEWX = OldX + VECX
+					NEWY = OldY + VECY
+					
+					Alter Object GeometryObject NODE SET POSITION CPOLY, CPOINT (NEWX, NEWY)
+				Next
+			Next
 			
 			CURROW = Table + ".ROWId"
 			UPDATE Table
-				SET OBJ = TMP
+				SET OBJ = GeometryObject
 				WHERE ROWId = CURROW
 		End If
 		Fetch Next From Table
 	Wend
 End Sub
 
-Sub ScalePolygon(TMP as Object, CPOLY as Integer, POLYCENTROIdX as Float, POLYCENTROIdY as FLoat, Multiplier as Float)
-	Dim OLDX as Float
-	Dim OLDY as Float
-	Dim NEWX as Float
-	Dim NEWY as Float
-	Dim VECX as Float
-	Dim VECY as Float
-	Dim NPOINTS, CPOINT as Integer
+Sub ScalePolygon(TMP As Object, CPOLY As Integer, POLYCENTROIdX As Float, POLYCENTROIdY As FLoat, Multiplier As Float)
+	Dim OLDX , OLDY, NEWX, NEWY, VECX, VECY As Float
+	Dim NPOINTS, CPOINT As Integer
 	
 	NPOINTS = ObjectInfo(TMP, OBJ_Info_NPOLYGONS + CPOLY)
-	
 	For CPOINT = 1 To NPOINTS-1
 		OLDX = ObjectNODEX(TMP, CPOLY, CPOINT)
 		OLDY = ObjectNODEY(TMP, CPOLY, CPOINT)
@@ -253,8 +271,8 @@ Sub ScalePolygon(TMP as Object, CPOLY as Integer, POLYCENTROIdX as Float, POLYCE
 	Next
 End Sub
 
-Sub CalculatePolygonCentroid(TMP as Object, CPOLY as Integer, POLYCENTROIdX as Float, POLYCENTROIdY as FLoat)
-	Dim NPOINTS, CPOINT as Integer
+Sub CalculatePolygonCentroid(TMP As Object, CPOLY As Integer, POLYCENTROIdX As Float, POLYCENTROIdY As FLoat)
+	Dim NPOINTS, CPOINT As Integer
 	POLYCENTROIdX = 0
 	POLYCENTROIdY = 0
 	NPOINTS = ObjectInfo(TMP, OBJ_Info_NPOLYGONS + CPOLY)
@@ -266,91 +284,73 @@ Sub CalculatePolygonCentroid(TMP as Object, CPOLY as Integer, POLYCENTROIdX as F
 	POLYCENTROIdY = POLYCENTROIdY / NPOINTS
 End Sub
 
-Sub ScaleRegion(Tmp as Object, Multiplier as Float)
-	Dim NPolys as Integer
-	Dim CurRow as Alias
-	Dim CPoly as Integer
-	Dim NPoints as Integer
-	Dim POLYCENTROIdVECX as Float
-	Dim POLYCENTROIdVECY as Float
-	
-	Dim POLYCENTROIDX as Float
-	Dim PolyCentroidY As Float
-	Dim CPoint as Integer
-
+Sub ScaleRegion(Tmp As Object, Multiplier As Float)
+	Dim CurRow As Alias
+	Dim NPolys, CPoly As Integer
+	Dim POLYCENTROIdVECX, POLYCENTROIdVECY, POLYCENTROIDX, PolyCentroidY As Float
 
 	NPOLYS = ObjectInfo(TMP, OBJ_Info_NPOLYGONS)
 	For CPOLY = 1 To NPOLYS
-		NPOINTS = ObjectInfo(TMP, OBJ_Info_NPOLYGONS + CPOLY)
+		' check for poly
 		Call CalculatePolygonCentroid(TMP, CPOLY, POLYCENTROIDX, POLYCENTROIDY)
 		Call ScalePolygon(TMP, CPOLY, POLYCENTROIDX, POLYCENTROIDY, Multiplier)
 	Next
 End Sub
 
-Sub NmorfMap(Table As String, UserColumn As Integer, ParameterSum As Float, AreaSum As Float, MaxMultiplier As Float, ScaleMode As Integer)
-	Dim Column As Alias
-	Column = Table + ".COL" + STR$(USERCOLUMN)
-	Dim Tmp as Object
-	Dim Multiplier as Float
-	Dim NPolys as Integer
-	Dim CurRow as Alias
+Sub NmorfMap(Table As String, ColumnNum As Integer, ParameterSum As Float, AreaSum As Float, MaxMultiplier As Float, ScaleMode As Integer)
+	Dim Column, ObjColumn, CurRow As Alias
+	Dim Tmp As Object
+	Dim Multiplier As Float
+	Dim NPolys As Integer
 	
-	Dim ObjColumn as Alias
+	Column = Table + ".COL" + STR$(ColumnNum)
 	ObjColumn = Table + ".OBJ"
 
 	Fetch First From Table
 	While Not EOT(Table)
 		TMP = OBJCOLUMN
 		If ObjectInfo(Tmp, OBJ_Info_TYPE) = OBJ_REGION Then
-			Multiplier = Sqr (Column / ParameterSum * AreaSum / Area (TMP, "SQ KM") )	
-			If ScaleMode = 2 Then
-				Multiplier =  Multiplier / MaxMultiplier
-			End If			
+			Multiplier = Sqr (Column / ParameterSum * AreaSum / Area (TMP, "SQ KM") )
+			
+			'If ScaleMode = 2 Then
+			'	Multiplier =  Multiplier / MaxMultiplier
+			'End If	
+			
 			Call ScaleRegion(TMP, Multiplier)
+			
 			CURROW = Table + ".ROWId"
-			UPDATE Table
-				SET OBJ = TMP
-				WHERE ROWId = CURROW
+			UPDATE Table SET OBJ = TMP WHERE ROWId = CURROW
 		End If
 		Fetch Next From Table
 	Wend
 End Sub
 
 Sub Main
-	Dim USERTABLE  as Integer
-	Dim ScaleMode as Integer
-	Dim USERCOLUMN as Integer
-	Dim Table as String
-	Dim Column as Alias
+	Dim TableNum, ColumnNum, ScaleMode As Integer
 	
-	USERTABLE = 1
-	USERCOLUMN = 1
+	TableNum = 1
+	ColumnNum = 1
 	ScaleMode = 1
 
-	Call CreateDialog(USERTABLE, USERCOLUMN, ScaleMode)
+	Call CreateDialog(TableNum, ColumnNum, ScaleMode)
 
 	If CommandInfo(CMD_INFO_DLG_OK) Then
-		Table = TABLEInfo(USERTABLE, TAB_Info_NAME)
-
-		Dim ParameterSum, AreaSum as Float
-		Dim MaxParameter as Float
-		Dim MaxArea as Float
-		Dim MaxMultiplier as Float
-
-		ParameterSum = CalculateParameterSum(Table, UserColumn)
-		AreaSum = CalculateAreaSum(Table)		
+		Dim TableName As String
+		Dim ParameterSum, AreaSum, MaxParameter, MaxArea, MaxMultiplier As Float
 		
-		MaxParameter = FindMaxParameter(Table, UserColumn)		
-		MaxArea = FindMaxArea(Table)	
-		MaxMultiplier = FindMaxMultiplier(Table, UserColumn, MaxParameter, MaxArea)
+		TableName = TABLEInfo(TableNum, TAB_Info_NAME)
+		ParameterSum = CalculateParameterSum(TableName, ColumnNum)
+		AreaSum = CalculateAreaSum(TableName)
+		MaxParameter = FindMaxParameter(TableName, ColumnNum)	
+		MaxArea = FindMaxArea(TableName)
+		MaxMultiplier = FindMaxMultiplier(TableName, ColumnNum, MaxParameter, MaxArea)
 		
-		If ScaleMode = 1 Then
-			Call ScaleMap(Table, MaxMultiplier)
-		End If
+		' хак на время доработки
+		ScaleMode = 0
 		
-		
-		
-		Call NmorfMap(Table, UserColumn, ParameterSum, AreaSum, MaxMultiplier, ScaleMode)
+		' пройти по таблице и анаморфировать
+		Call NmorfMap(TableName, ColumnNum, ParameterSum, AreaSum, MaxMultiplier, ScaleMode)
 	End If
 End Sub
 
+ 
