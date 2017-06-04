@@ -17,6 +17,7 @@ Declare Function FindMaxArea(TableName As String) As Float
 Declare Sub      CalculatePolygonCentroid(TMP As Object, CPOLY As Integer, POLYCENTROIdX As Float, POLYCENTROIdY As FLoat)
 Declare Sub      ScaleRegion(Poly As Object, Multiplier As Float)
 Declare Sub      NmorfMap(TableName As String, Column As Integer, ParameterSum As Float, AreaSum As Float, MaxMultiplier As Float, ScaleMode As Integer)
+Declare Function CalculateMultiplier(ByVal ParameterVal, ParameterSum, AreaVal, AreaSum As Float) As Float
 
 Function BuildListOfTables() As String
 	Dim Table As Integer
@@ -95,7 +96,11 @@ Function CalculateAreaSum(Table As String) As Float
 	CalculateAreaSum = AreaSum
 End Function
 
-Function FindMaxMultiplier(Table As String, Column As Integer, MaxParameter As Float, MaxArea As Float) As Float
+Function CalculateMultiplier(ByVal ParameterVal, ParameterSum, AreaVal, AreaSum As Float) As Float
+	CalculateMultiplier = Sqr(ParameterVal / ParameterSum * AreaSum / AreaVal)
+End Function
+
+Function FindMaxMultiplier(Table As String, Column As Integer, ParameterSum As Float, AreaSum As Float) As Float
 	Dim MaxMultiplier As Float
 	Dim GeometryObject As Alias
 	Dim ColumnValue As Alias
@@ -108,7 +113,9 @@ Function FindMaxMultiplier(Table As String, Column As Integer, MaxParameter As F
 	While Not EOT(Table)
 		If ObjectInfo(GeometryObject, OBJ_INFO_TYPE) = OBJ_REGION Then
 			Dim Multiplier As Float
-			Multiplier = Sqr(ColumnValue / MaxParameter * MaxArea / Area(GeometryObject, "SQ KM"))
+			Dim AreaVal As Float
+			AreaVal = Area(GeometryObject, "SQ KM")
+			Multiplier = CalculateMultiplier(ColumnValue, ParameterSum, AreaVal, AreaSum)
 			If Multiplier > MaxMultiplier Then
 				MaxMultiplier = Multiplier
 			End If
@@ -312,9 +319,10 @@ Sub NmorfMap(Table As String, ColumnNum As Integer, ParameterSum As Float, AreaS
 		If ObjectInfo(Tmp, OBJ_Info_TYPE) = OBJ_REGION Then
 			Multiplier = Sqr (Column / ParameterSum * AreaSum / Area (TMP, "SQ KM") )
 			
-			'If ScaleMode = 2 Then
-			'	Multiplier =  Multiplier / MaxMultiplier
-			'End If	
+			If ScaleMode = 2 Then
+				Multiplier =  Multiplier / MaxMultiplier
+				print Multiplier
+			End If	
 			
 			Call ScaleRegion(TMP, Multiplier)
 			
@@ -343,10 +351,10 @@ Sub Main
 		AreaSum = CalculateAreaSum(TableName)
 		MaxParameter = FindMaxParameter(TableName, ColumnNum)	
 		MaxArea = FindMaxArea(TableName)
-		MaxMultiplier = FindMaxMultiplier(TableName, ColumnNum, MaxParameter, MaxArea)
+		MaxMultiplier = FindMaxMultiplier(TableName, ColumnNum, ParameterSum, AreaSum)
 		
 		' хак на время доработки
-		ScaleMode = 0
+		ScaleMode = 2
 		
 		' пройти по таблице и анаморфировать
 		Call NmorfMap(TableName, ColumnNum, ParameterSum, AreaSum, MaxMultiplier, ScaleMode)
