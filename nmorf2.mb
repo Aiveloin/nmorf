@@ -1,0 +1,149 @@
+Include "MapBasic.def"
+
+Declare Sub Main
+Declare Function BuildListOfColumns(Table As Integer) As String
+Declare Function BuildListOfTables() As String
+Declare Sub      CreateDialog(Table As Integer, Column As Integer)
+Declare Sub      UpdateDialog
+Declare Sub      CalcMapExtent(Table As String, ExtentTopLeftX, ExtentTopLeftY, ExtentBottomRightX, ExtentBottomRightY As Float)
+Declare Sub	 MakeRaster(TableName As String, RasterStep As Float, ExtentTopLeftX, ExtentTopLeftY, ExtentBottomRightX, ExtentBottomRightY As Float)
+
+Function BuildListOfTables() As String
+	Dim Table As Integer
+	Dim ListOfTables As String
+	For Table = 1 To NumTables()
+		ListOfTables = ListOfTables + TableInfo(Table, TAB_Info_NAME) + ";"
+	Next
+	BuildListOfTables = ListOfTables
+End Function
+
+Function BuildListOfColumns(Table As Integer) As String
+	Dim Column As Integer
+	Dim Return As String
+	For Column = 1 To NumCols(Table)
+		Return = Return + ColumnInfo (Table, "COL" + Column, COL_Info_NAME) + ";"
+	Next
+	BuildListOfColumns = Return
+End Function
+
+Sub CreateDialog (Table As Integer, Column As Integer)
+	Dialog  
+		Title "Select nmorf setup"
+
+		Control PopupMenu
+			Title   BuildListOfTables()
+			Into    Table
+			Calling UpdateDialog
+			Id      1
+
+		Control PopupMenu
+			Title   BuildListOfColumns(Table)
+			Into    Column
+			Id      2
+
+		Control OKBUTTON
+		Control CANCELBUTTON
+End Sub
+
+Sub UpdateDialog
+	Dim Table As Integer
+	Table = ReadControlValue(1) 
+	Alter Control 2 Title BuildListOfColumns(Table)
+End Sub
+
+Sub CalcMapExtent(Table As String, ExtentTopLeftX, ExtentTopLeftY, ExtentBottomRightX, ExtentBottomRightY As Float)
+	Dim GeometryObject As Alias
+	GeometryObject = Table + ".OBJ"
+	
+	Fetch First From Table
+	
+	ExtentTopLeftX = CentroidX(GeometryObject)
+	ExtentTopLeftY = CentroidY(GeometryObject)
+	ExtentBottomRightX = CentroidX(GeometryObject)
+	ExtentBottomRightY = CentroidY(GeometryObject)
+
+	While Not EOT(Table)
+		If ObjectInfo(GeometryObject, OBJ_INFO_TYPE) = OBJ_REGION Then
+			Dim NPOLYS, CPOLY, CPOINT, NPOINTS As Integer
+			NPOLYS = ObjectInfo (GeometryObject, OBJ_Info_NPOLYGONS)
+			For CPOLY = 1 To NPOLYS
+				NPOINTS = ObjectInfo (GeometryObject, OBJ_Info_NPOLYGONS + CPOLY)
+				For CPOINT = 1 To NPOINTS-1
+					If ObjectNODEX(GeometryObject, CPOLY, CPOINT) < ExtentTopLeftX Then
+						ExtentTopLeftX = ObjectNODEX(GeometryObject, CPOLY, CPOINT)
+					End If
+					
+					If ObjectNODEX(GeometryObject, CPOLY, CPOINT) > ExtentBottomRightX Then 
+						ExtentBottomRightX = ObjectNODEX(GeometryObject, CPOLY, CPOINT)
+					End If
+					
+					If ObjectNODEY(GeometryObject, CPOLY, CPOINT) > ExtentTopLeftY Then
+						ExtentTopLeftY = ObjectNODEY(GeometryObject, CPOLY, CPOINT)
+					End If
+					
+					If ObjectNODEY(GeometryObject, CPOLY, CPOINT) < ExtentBottomRightY Then
+						ExtentBottomRightY = ObjectNODEY(GeometryObject, CPOLY, CPOINT)
+					End If
+				Next
+			Next
+		End If
+		Fetch Next From Table
+	Wend
+End Sub
+
+Sub MakeRaster(TableName As String, RasterStep As Float, ExtentTopLeftX, ExtentTopLeftY, ExtentBottomRightX, ExtentBottomRightY As Float)
+	Dim X, Y As Float
+	
+	Y = ExtentTopLeftY
+	While Y > ExtentBottomRightY
+		X = ExtentTopLeftX
+		While X < ExtentBottomRightX
+			Insert Into TableName (Obj) Values (CreatePoint(X, Y))
+			X = X + RasterStep
+		Wend
+		Y = Y - RasterStep
+	Wend
+End Sub
+
+Sub Main()
+	
+	Dim RasterName As String
+	RasterName = "Raster"
+	
+	Dim ExtentTopLeftX, ExtentTopLeftY, ExtentBottomRightX, ExtentBottomRightY As Float
+	
+	Dim TableNum, ColumnNum As Integer
+	
+	TableNum = 1
+	ColumnNum = 1
+
+	Call CreateDialog(TableNum, ColumnNum)
+
+	If CommandInfo(CMD_INFO_DLG_OK) Then
+		Dim TableName As String
+		TableName = TABLEInfo(TableNum, TAB_Info_NAME)
+		
+		' create grid {obj, density}
+		Create Table Raster (Density Float)
+		Create Map For Raster CoordSys Table TableName
+		
+		Call CalcMapExtent(TableName, ExtentTopLeftX, ExtentTopLeftY, ExtentBottomRightX, ExtentBottomRightY)
+		
+		Dim RasterStep As Float
+		RasterStep = 0.5
+		
+		' fill from top-left with choosed step
+		Call MakeRaster(RasterName, RasterStep, ExtentTopLeftX, ExtentTopLeftY, ExtentBottomRightX, ExtentBottomRightY)
+		
+		'do
+			' fill grid
+				' fill base density
+				' calc middle density
+				' calc vector multiplier
+			' deform geometry
+				'sum vectors
+				'aplly vector
+			' calc error
+		' repeat (error > e)
+	End If
+End Sub
