@@ -7,6 +7,7 @@ Declare Sub      CreateDialog(Table As Integer, Column As Integer)
 Declare Sub      UpdateDialog
 Declare Sub      CalcMapExtent(Table As String, ExtentTopLeftX, ExtentTopLeftY, ExtentBottomRightX, ExtentBottomRightY As Float)
 Declare Sub	 MakeRaster(TableName As String, RasterStep As Float, ExtentTopLeftX, ExtentTopLeftY, ExtentBottomRightX, ExtentBottomRightY As Float)
+Declare Sub      FillDensity(TableName, RasterName As String, ColumnNum As Integer)
 
 Function BuildListOfTables() As String
 	Dim Table As Integer
@@ -105,6 +106,37 @@ Sub MakeRaster(TableName As String, RasterStep As Float, ExtentTopLeftX, ExtentT
 	Wend
 End Sub
 
+Sub FillDensity(TableName, RasterName As String, ColumnNum As Integer)
+	Dim Cell, ColVal, Reg As Alias
+	Cell = RasterName + ".OBJ"
+	ColVal = TableName + ".COL" + ColumnNum
+	Reg = TableName + ".OBJ"
+	
+	Fetch First From RasterName
+	
+	Dim idnum as Integer
+	idnum = 1
+	
+	While Not EOT(RasterName)
+		' Get Intersection
+		Fetch First From TableName
+		
+		While Not EOT(TableName)
+			' Check Intersection w/ Obj
+			If (Cell Within Reg) Then
+				Dim F As Float
+				F = ColVal
+				Update RasterName Set Density = F Where RowID = idnum
+			End If
+			Fetch Next From TableName
+			
+		Wend
+		
+		idnum = idnum + 1
+		Fetch Next From RasterName
+	Wend
+End Sub
+
 Sub Main()
 	
 	Dim RasterName As String
@@ -138,6 +170,7 @@ Sub Main()
 		'do
 			' fill grid
 				' fill base density
+				Call FillDensity(TableName, RasterName, ColumnNum)
 				' calc middle density
 				' calc vector multiplier
 			' deform geometry
