@@ -217,24 +217,20 @@ Sub ApplyVectors(TableName, RasterName As String, RasterStep As Float)
 						VecX = CellX - NodeX
 						VecY = CellY - NodeY
 						
-						'Dim CopyX, CopyY As Float
-						'CopyX = VecX
-						'CopyY = VecY
-						
 						'calc vector len
 						Dim VecLen As Float
 						VecLen = Sqr( (CellX-NodeX)^2 + (CellY-NodeY)^2 )
 						
-						'make vector len = 1 * RasterStep/2
-						VecX = VecX / VecLen '* RasterStep/2
-						VecY = VecY / VecLen '* RasterStep/2
+						'normalize vector
+						VecX = VecX / VecLen
+						VecY = VecY / VecLen
 						
 						'mult vector by cell multiplier
 						Dim Multiplier As Alias
 						Multiplier = RasterName + ".COL2"
 						
 						Dim Coeff As FLoat
-						Coeff = 0.01 '----------------------------------------------------------COEFF---------------------------
+						Coeff = 0.1 '----------------------------------------------------------COEFF---------------------------
 						
 						If Multiplier > 1 Then
 							Coeff = -1 * Coeff
@@ -243,14 +239,9 @@ Sub ApplyVectors(TableName, RasterName As String, RasterStep As Float)
 						VecX = VecX * Multiplier * Coeff
 						VecY = VecY * Multiplier * Coeff
 						
-						'calc difference
-						'Dim DiffX, DiffY As Float
-						'DiffX = VecX - CopyX
-						'DiffY = VecY - CopyY
-						
 						'sum difference
-						SumX = SumX + VecX 'DiffX
-						SumY = SumY + VecY 'DiffY
+						SumX = SumX + VecX
+						SumY = SumY + VecY
 						
 						Fetch Next From RasterName
 					Wend
@@ -307,8 +298,6 @@ Sub Main()
 				' calc vector multiplier
 				Call CalcVectorMultipliers(RasterName, CommonDensity)
 			' deform geometry
-				'sum vectors
-				'aplly vector
 				Call ApplyVectors(TableName, RasterName, RasterStep)
 			' calc error
 		' repeat (error > e)
