@@ -207,6 +207,7 @@ Sub ApplyVectors(TableName, RasterName As String, RasterStep As Float)
 					While Not EOT(RasterName)
 						Dim Cell As Alias
 						Cell = RasterName + ".OBJ"
+						
 						'build vector
 						Dim CellX, CellY As Float
 						CellX = CentroidX(Cell)
@@ -217,10 +218,12 @@ Sub ApplyVectors(TableName, RasterName As String, RasterStep As Float)
 						VecY = CellY - NodeY
 						
 						Dim CopyX, CopyY As Float
+						CopyX = VecX
+						CopyY = VecY
 						
 						'calc vector len
 						Dim VecLen As Float
-						VecLen = Distance(CellX, CellY, NodeX, NodeY, "km")
+						VecLen = Sqr( (CellX-NodeX)^2 + (CellY-NodeY)^2 )
 						
 						'make vector len = 1 * RasterStep/2
 						VecX = VecX / VecLen * RasterStep/2
