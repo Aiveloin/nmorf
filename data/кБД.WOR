@@ -1,29 +1,30 @@
 !Workspace
-!Version 400
+!Version 550
 !Charset WindowsCyrillic
 Open Table "Районы_административные" As Районы_административные Interactive
 Open Table "Районы_административные_bgr" As Районы_административные_bgr Interactive
 Map From Районы_административные,Районы_административные_bgr 
   Position (0.0625,0.0520833) Units "in"
   Width 8.77083 Units "in" Height 6.01042 Units "in" 
-Set Window FrontWindow() ScrollBars Off Autoscroll On
+Set Window FrontWindow() ScrollBars Off Autoscroll On Snap Mode On
 Set Map
-  CoordSys Earth Projection 8, 1001, "m", 45, 0, 1, 8500000, 0
-  Center (8615528.668,5691773.985)
-  Zoom 838.1165621 Units "km"
+  CoordSys NonEarth Units "m"
+  Center (5188139.287,5709201.804)
+  Zoom 995.6694818 Units "km"
   Preserve Zoom Display Position
   Distance Units "km" Area Units "sq km" XY Units "m"
+  Distance Type Cartesian
 Set Map
   Layer 1
     Display Global
-    Global Pen (1,1,0)  Brush (2,12632256,16777215)  Symbol (35,0,12)  Line (2,2,16711680)  Font ("Arial Cyr",0,9,0)
+    Global Pen (1,2,9474192)  Brush (2,12632256,16777215)  Symbol (35,0,12)  Line (2,2,16711680)  Font ("Arial Cyr",0,9,0)
     Label Line None Position Center Font ("Arial Cyr",0,9,0) Pen (1,2,0) 
       With Название
       Parallel On Auto Off Overlap Off Duplicates On Offset 2
       Visibility On
   Layer 2
     Display Global
-    Global Pen (1,2,0)  Brush (2,4227327,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Arial",0,9,0)
+    Global Pen (1,2,0)  Brush (2,16711680,16777215)  Symbol (35,0,12)  Line (1,2,0)  Font ("Arial",0,9,0)
     Label Line None Position Center Font ("Arial Cyr",0,9,0) Pen (1,2,0) 
       With Название
       Parallel On Auto Off Overlap Off Duplicates On Offset 2

@@ -152,9 +152,9 @@ Function CalcCommonDensity(RasterName As String) As Float
 	While Not EOT(RasterName)
 		If Density > 0 Then
 			CommonDensity = CommonDensity + Density
+			Counter = Counter + 1
 		End If
 		Fetch Next From RasterName
-		Counter = Counter + 1
 	Wend
 	CommonDensity = CommonDensity / Counter
 	CalcCommonDensity = CommonDensity
@@ -217,33 +217,40 @@ Sub ApplyVectors(TableName, RasterName As String, RasterStep As Float)
 						VecX = CellX - NodeX
 						VecY = CellY - NodeY
 						
-						Dim CopyX, CopyY As Float
-						CopyX = VecX
-						CopyY = VecY
+						'Dim CopyX, CopyY As Float
+						'CopyX = VecX
+						'CopyY = VecY
 						
 						'calc vector len
 						Dim VecLen As Float
 						VecLen = Sqr( (CellX-NodeX)^2 + (CellY-NodeY)^2 )
 						
 						'make vector len = 1 * RasterStep/2
-						VecX = VecX / VecLen * RasterStep/2
-						VecY = VecY / VecLen * RasterStep/2
+						VecX = VecX / VecLen '* RasterStep/2
+						VecY = VecY / VecLen '* RasterStep/2
 						
 						'mult vector by cell multiplier
 						Dim Multiplier As Alias
 						Multiplier = RasterName + ".COL2"
 						
-						VecX = VecX * Multiplier
-						VecY = VecY * Multiplier
+						Dim Coeff As FLoat
+						Coeff = 0.01 '----------------------------------------------------------COEFF---------------------------
+						
+						If Multiplier > 1 Then
+							Coeff = -1 * Coeff
+						End If
+						
+						VecX = VecX * Multiplier * Coeff
+						VecY = VecY * Multiplier * Coeff
 						
 						'calc difference
-						Dim DiffX, DiffY As Float
-						DiffX = VecX - CopyX
-						DiffY = VecY - CopyY
+						'Dim DiffX, DiffY As Float
+						'DiffX = VecX - CopyX
+						'DiffY = VecY - CopyY
 						
 						'sum difference
-						SumX = SumX + DiffX
-						SumY = SumY + DiffY
+						SumX = SumX + VecX 'DiffX
+						SumY = SumY + VecY 'DiffY
 						
 						Fetch Next From RasterName
 					Wend
@@ -285,7 +292,7 @@ Sub Main()
 		Call CalcMapExtent(TableName, ExtentTopLeftX, ExtentTopLeftY, ExtentBottomRightX, ExtentBottomRightY)
 		
 		Dim RasterStep As Float
-		RasterStep = 0.5
+		RasterStep = 0.5 '--------------------------------------------------------------------------------------STEP----------------------------
 		
 		' fill from top-left with choosed step
 		Call MakeRaster(RasterName, RasterStep, ExtentTopLeftX, ExtentTopLeftY, ExtentBottomRightX, ExtentBottomRightY)
